@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation group: 'org.json', name: 'json', version: '20200518'
+}
+
+
+// Define the main class for the server
+def serverMainClass = 'ServerLogic'
+
+// Define the main class for the client
+def clientMainClass = 'ClientGui'
+
+// Define the default port for the server and client
+def defaultPort = 8080
+
+// Define the default host for the client
+def defaultHost = 'localhost'
+
+// Define the task to run the server
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = serverMainClass
+    args = ["-p", System.getProperty("port", defaultPort.toString())]
+}
+
+// Define the task to run the client
+task runClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = clientMainClass
+    args = ["-p", System.getProperty("port", defaultPort.toString()), "-h", System.getProperty("host", defaultHost)]
+}
+
+// Define the task to build the jar file
+task udpJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': serverMainClass
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+// Set the default task to run the server
+defaultTasks 'runServer'
